@@ -7,12 +7,15 @@ const playStore = require('./playstore.js');
 
 app.get('/apps',(req,res) => {
 
-  let results = playStore;
+  let results = playStore.map(i => i);
+
   let { genre, sort} = req.query;
   // If genre or sort is provided
-
-  if (genre){
-    genre.toLowerCase();
+  if ('sort' in req.query && !sort) {
+    return res.status(400).send('Sort cannot be empty.');
+  }
+  if('genre' in req.query && !genre) {
+    return res.status(400).send('Genre cannot be empty.');
   }
 
   if(sort){
@@ -23,28 +26,25 @@ app.get('/apps',(req,res) => {
         return a[sort] < b[sort] ? 1 : -1;
       });
     }
-    if (sort === 'App'){
+    else if (sort === 'App'){
       results.sort((a,b)=>{
         return a[sort].toUpperCase() > b[sort].toUpperCase() ? 1 : -1;
       });
     }
+    else return res.status(400).send('Must sort by Rating or App.');
   }
-  // if (sort){
-  //   results.sort((a,b)=>{
-  //     return a[sort] > b[sort] ? 1 : a[sort] < b[sort] ? -1 : 0;
-  //   });
-  // }
 
-  // validate the input
+  if (genre){
+    let genreFilter = ['Action', 'Puzzle', 'Strategy', 'Casual', 'Arcade', 'Card'];
+    genre = genre.toLowerCase();
+    genre = genre.charAt(0).toUpperCase() + genre.slice(1);
 
-  // logic of sorting
-
-  
-  //   .filter(book =>
-  //     book
-  //       .title
-  //       .toLowerCase()
-  //       .includes(search.toLowerCase()));
+    if(genreFilter.includes(genre)) {
+      results = results.filter(app=> {
+        return app.Genres.toLowerCase().includes(genre.toLowerCase());
+      });
+    } else return res.status(400).send(`Must be of genre ${genreFilter.join(', ')}`);
+  }
 
   return res.json(results);
 });

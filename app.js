@@ -7,7 +7,7 @@ const playStore = require('./playstore.js');
 
 app.get('/apps',(req,res) => {
   //sets results equal to a copy of playstore
-  let results = playStore.map(i => i);
+  let results = [...playStore];
   //destructuring
   let { genre, sort } = req.query;
   // If genre or sort are provided empty queries
